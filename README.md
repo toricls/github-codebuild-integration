@@ -92,7 +92,9 @@ _**NOTE: If you plan installing github-codebuild-integration into multiple AWS r
 
 ### Per-Project Resources
 
-#### Configure for your GitHub repository
+_**NOTE: Make sure you've created your AWS CodeBuild project before proceeding to the next steps.**_
+
+#### Configure parameters
 
 Copy example configuration file and edit it to configure paramters for your GitHub repository.
 
