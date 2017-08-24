@@ -14,6 +14,14 @@ Yay, Serverless!
 
 [![Overview](https://github.com/toricls/github-codebuild-integration/wiki/res/overview-800x463.png)](https://github.com/toricls/github-codebuild-integration/wiki/res/overview.png)
 
+**Commits:**
+
+[![Commits](https://github.com/toricls/github-codebuild-integration/wiki/res/commits-300x234.png)](https://github.com/toricls/github-codebuild-integration/wiki/res/commits.png)
+
+**Pull Request:**
+
+[![Pull Request](https://github.com/toricls/github-codebuild-integration/wiki/res/pr-600x394.png)](https://github.com/toricls/github-codebuild-integration/wiki/res/pr.png)
+
 ## Features
 
 - Invoking a pre-configured AWS CodeBuild project by hooking Push or Pull Reqeust webhook events.
