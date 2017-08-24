@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+set -e
+
+cat << EOF
+===================================================
+  scripts/deploy
+===================================================
+EOF
+
+ENV_FILE_PATH=$1
+source $ENV_FILE_PATH
+TEMPLATE=".sam/packaged-$CODEBUILD_PROJECT_NAME.yml"
+CFN_STACK_NAME="$CODEBUILD_PROJECT_NAME"
+
+# deploy
+aws cloudformation deploy \
+    --template-file "$TEMPLATE" \
+    --stack-name "$CFN_STACK_NAME" \
+    --capabilities "CAPABILITY_IAM" \
+    --parameter-overrides GitHubRepositoryUrl=$GITHUB_REPOSITORY_URL \
+        GitHubPersonalAccessToken=$GITHUB_PERSONAL_ACCESS_TOKEN \
+        GitHubTargetResource=$GITHUB_TARGET_RESOURCE \
+        GitHubIgnoreBranchRegex=$GITHUB_IGNORE_BRANCH_REGEX \
+        CodeBuildProjectName=$CODEBUILD_PROJECT_NAME \
+        CodeBuildRegion=$CODEBUILD_PROJECT_REGION \
+    --region "$AWS_DEFAULT_REGION"

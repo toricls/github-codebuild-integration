@@ -1,0 +1,12 @@
+{
+  "name": "build-result-exporter",
+  "description": "",
+  "engines": {
+    "node": ">=6.1"
+  },
+  "author": "toricls",
+  "license": "MIT",
+  "devDependencies": {
+    "aws-sdk": "^2.102.0"
+  }
+}

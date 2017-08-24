@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+set -e
+
+cat << EOF
+===================================================
+  scripts/clean
+===================================================
+EOF
+
+echo "Cleaning AWS SAM's local store"
+rm -f ./.sam/*.yml
+
+for dir in ./src/functions/*; do
+    echo "Cleaning dependencies for $dir"
+    pushd $dir > /dev/null
+    yarn clean
+    popd > /dev/null
+done

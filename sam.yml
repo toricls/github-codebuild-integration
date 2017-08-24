@@ -1,0 +1,283 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Creates resources for github-codebuild-integration
+Parameters:
+  # see env/example.env about parameters
+  GitHubRepositoryUrl:
+    Type: String
+  GitHubPersonalAccessToken:
+    Type: String
+  GitHubTargetResource:
+    Type: String
+  GitHubIgnoreBranchRegex:
+    Type: String
+  CodeBuildProjectName:
+    Type: String
+  CodeBuildRegion:
+    Type: String
+
+Resources:
+  # AWS SAM doesn't support `Transform` in nested templates, we includes all children into main template
+  # see https://github.com/awslabs/serverless-application-model/issues/90
+  ##########################
+  # SNSStack
+  ##########################
+  GitHubEventSNSTopic:
+    Type: "AWS::SNS::Topic"
+  ##########################
+  # IAMStack
+  ##########################
+  GitHubIAMUser:
+    Type: "AWS::IAM::User"
+    Properties:
+      Policies:
+        - PolicyName: !Sub "${CodeBuildProjectName}-github-sns-role"
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action: "sns:Publish"
+                Resource: !Ref GitHubEventSNSTopic
+  GitHubIAMUserAccessKey:
+    Type: "AWS::IAM::AccessKey"
+    Properties:
+      UserName: !Ref GitHubIAMUser
+  ##########################
+  # GitHubWebhookStack
+  ##########################
+  GitHubWebhookCustomResourceRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: "sts:AssumeRole"
+      Policies:
+        - PolicyName: !Sub "${CodeBuildProjectName}-github-webhook-lambda-execution-role"
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "arn:aws:logs:*:*:*"
+  GitHubWebhookCustomResource:
+    Type: "AWS::Serverless::Function"
+    Properties:
+      Handler: index.handler
+      Role: !GetAtt GitHubWebhookCustomResourceRole.Arn
+      CodeUri: ./src/functions/github-webhook-resource
+      Runtime: nodejs6.10
+      Timeout: 30
+      Environment:
+        Variables:
+          GITHUB_TOKEN: !Ref GitHubPersonalAccessToken
+          GITHUB_REPOSITORY_URL: !Ref GitHubRepositoryUrl
+          GITHUB_TARGET_RESOURCE: !Ref GitHubTargetResource
+          SNS_ACCESS_KEY_ID: !Ref GitHubIAMUserAccessKey
+          SNS_SECRET_ACCESS_KEY: !GetAtt GitHubIAMUserAccessKey.SecretAccessKey
+          SNS_REGION: !Ref "AWS::Region"
+          SNS_TOPIC: !Ref GitHubEventSNSTopic
+  GitHubWebhook:
+    Type: "Custom::GitHubWebhook"
+    Properties:
+      ServiceToken: !GetAtt GitHubWebhookCustomResource.Arn
+      # Define all variables to re-create via `make deploy` when parameters have changed
+      GITHUB_TOKEN: !Ref GitHubPersonalAccessToken
+      GITHUB_REPOSITORY_URL: !Ref GitHubRepositoryUrl
+      GITHUB_TARGET_RESOURCE: !Ref GitHubTargetResource
+      SNS_ACCESS_KEY_ID: !Ref GitHubIAMUserAccessKey
+      SNS_SECRET_ACCESS_KEY: !GetAtt GitHubIAMUserAccessKey.SecretAccessKey
+      SNS_REGION: !Ref "AWS::Region"
+      SNS_TOPIC: !Ref GitHubEventSNSTopic
+  ##########################
+  # LambdaStack
+  ##########################
+  LambdaExecutionRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: "sts:AssumeRole"
+      Policies:
+        - PolicyName: !Sub "${CodeBuildProjectName}-lambda-execution-role"
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "arn:aws:logs:*:*:*"
+              - Effect: Allow
+                Action:
+                  - "codebuild:StartBuild"
+                  - "codebuild:BatchGetBuilds"
+                Resource: !Sub "arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${CodeBuildProjectName}"
+  BuildDispatcher:
+    Type: "AWS::Serverless::Function"
+    Properties:
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Handler: index.handler
+      Runtime: nodejs6.10
+      CodeUri: ./src/functions/build-dispatcher
+      Timeout: 10
+      MemorySize: 128
+      Environment:
+        Variables:
+          CODEBUILD_PROJECT_REGION: !Ref CodeBuildRegion
+          CODEBUILD_PROJECT_NAME: !Ref CodeBuildProjectName
+          GITHUB_TOKEN: !Ref GitHubPersonalAccessToken
+          GITHUB_REPOSITORY_URL: !Ref GitHubRepositoryUrl
+  BuildResultExporter:
+    Type: "AWS::Serverless::Function"
+    Properties:
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Handler: index.handler
+      Runtime: nodejs6.10
+      CodeUri: ./src/functions/build-result-exporter
+      Timeout: 10
+      MemorySize: 128
+  BuildResultNotifier:
+    Type: "AWS::Serverless::Function"
+    Properties:
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Handler: index.handler
+      Runtime: nodejs6.10
+      CodeUri: ./src/functions/build-result-notifier
+      Timeout: 10
+      MemorySize: 128
+      Environment:
+        Variables:
+          CODEBUILD_PROJECT_REGION: !Ref CodeBuildRegion
+          GITHUB_TOKEN: !Ref GitHubPersonalAccessToken
+          GITHUB_REPOSITORY_URL: !Ref GitHubRepositoryUrl
+  ##########################
+  # StepFunctionsStack
+  ##########################
+  SFLambdaExecutionRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: "sts:AssumeRole"
+      Policies:
+        - PolicyName: !Sub "${CodeBuildProjectName}-sf-lambda-execution-role"
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "arn:aws:logs:*:*:*"
+              - Effect: Allow
+                Action: "states:StartExecution"
+                Resource: !Ref BuildStateMachine
+  GitHubWebhookHandler:
+    Type: "AWS::Serverless::Function"
+    Properties:
+      Role: !GetAtt SFLambdaExecutionRole.Arn
+      Handler: index.handler
+      Runtime: nodejs6.10
+      CodeUri: ./src/functions/github-webhook-handler
+      Timeout: 10
+      MemorySize: 128
+      Events:
+        WebhookReceive:
+          Type: SNS
+          Properties:
+            Topic: !Ref GitHubEventSNSTopic
+      Environment:
+        Variables:
+          DO_NOT_RUN: false
+          STEP_FUNCTIONS_ARN: !Ref BuildStateMachine
+          CODEBUILD_PROJECT_REGION: !Ref CodeBuildRegion
+          GITHUB_TOKEN: !Ref GitHubPersonalAccessToken
+          GITHUB_REPOSITORY_URL: !Ref GitHubRepositoryUrl
+          GITHUB_TARGET_RESOURCE: !Ref GitHubTargetResource
+          GITHUB_IGNORE_BRANCH_REGEX: !Ref GitHubIgnoreBranchRegex
+  StatesExecutionRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - !Sub states.${AWS::Region}.amazonaws.com
+            Action: "sts:AssumeRole"
+      Path: "/"
+      Policies:
+        - PolicyName: StatesExecutionPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "lambda:InvokeFunction"
+                Resource: "*"
+  BuildStateMachine:
+    Type: "AWS::StepFunctions::StateMachine"
+    Properties:
+      DefinitionString: !Sub
+        |-
+          {
+            "StartAt": "Dispatch Build",
+            "States": {
+              "Dispatch Build": {
+                "Type": "Task",
+                "Resource": "${BuildDispatcher.Arn}",
+                "Next": "Wait 10 Seconds"
+              },
+              "Wait 10 Seconds": {
+                "Type": "Wait",
+                "Seconds": 10,
+                "Next": "Export Build Result"
+              },
+              "Export Build Result": {
+                "Type": "Task",
+                "Resource": "${BuildResultExporter.Arn}",
+                "Next": "Test If Build Finished"
+              },
+              "Test If Build Finished": {
+                "Type": "Choice",
+                "Choices": [
+                  {
+                    "Variable": "$.buildComplete",
+                    "BooleanEquals": true,
+                    "Next": "Notify Build Result"
+                  }
+                ],
+                "Default": "Wait 10 Seconds"
+              },
+              "Notify Build Result": {
+                "Type": "Task",
+                "Resource": "${BuildResultNotifier.Arn}",
+                "End": true
+              }
+            }
+          }
+      RoleArn: !GetAtt StatesExecutionRole.Arn
+
+Outputs:
+  GitHubEventSNSTopic:
+    Value: !Ref GitHubEventSNSTopic
+  GitHubIAMUserAccessKeyID:
+    Value: !Ref GitHubIAMUserAccessKey
+  GitHubIAMUserSecretAccessKey:
+    Value: !GetAtt GitHubIAMUserAccessKey.SecretAccessKey
+  GitHubWebhookID:
+    Value: !GetAtt GitHubWebhook.HookId

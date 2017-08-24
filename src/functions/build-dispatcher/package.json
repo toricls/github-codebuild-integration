@@ -1,0 +1,16 @@
+{
+  "name": "build-dispatcher",
+  "description": "",
+  "engines": {
+    "node": ">=6.1"
+  },
+  "author": "toricls",
+  "license": "MIT",
+  "dependencies": {
+    "github": "^9.3.1",
+    "parse-github-url": "^1.0.0"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.102.0"
+  }
+}

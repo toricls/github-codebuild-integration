@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+set -e
+
+cat << EOF
+===================================================
+  scripts/package
+===================================================
+EOF
+
+S3_SAM_ARTIFACTS_BUCKET_NAME="$1"
+CODEBUILD_PROJECT_NAME="$2"
+
+MAIN_TEMPLATE="sam.yml"
+OUT=".sam/packaged-$CODEBUILD_PROJECT_NAME.yml"
+S3_PREFIX="$CODEBUILD_PROJECT_NAME/$(date '+%Y%m%d-%H%M%S')"
+
+# package
+aws cloudformation package \
+    --template-file "$MAIN_TEMPLATE" \
+    --s3-bucket "$S3_SAM_ARTIFACTS_BUCKET_NAME" \
+    --s3-prefix "$S3_PREFIX" \
+    --output-template-file "$OUT"

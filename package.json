@@ -1,0 +1,31 @@
+{
+  "name": "github-codebuild-integration",
+  "version": "0.1.0",
+  "description": "",
+  "scripts": {
+    "test": "mocha $(find src -name '*.test.js')",
+    "lint": "eslint --ext .js src test"
+  },
+  "engines": {
+    "node": ">=6.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/toricls/github-codebuild-integration.git"
+  },
+  "keywords": [
+    "github",
+    "aws codebuild",
+    "amazon sns"
+  ],
+  "author": "toricls",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/toricls/github-codebuild-integration/issues"
+  },
+  "homepage": "https://github.com/toricls/github-codebuild-integration",
+  "devDependencies": {
+    "eslint": "^4.5.0",
+    "mocha": "^3.5.0"
+  }
+}

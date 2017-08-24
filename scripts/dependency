@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+set -e
+
+cat << EOF
+===================================================
+  scripts/dependency
+===================================================
+EOF
+
+echo "Installing global dependencies"
+yarn install
+
+ENVIRONMENT=$1
+YARN_OPTS=
+
+if [ "x$ENVIRONMENT" == "xproduction" ]; then
+    YARN_OPTS=" --production --prefer-offline"
+    echo "Configured as production mode."
+fi
+
+echo "Installing functions' dependencies"
+
+for dir in ./src/functions/*; do
+    echo "Installing dependencies for $dir"
+    pushd $dir > /dev/null
+    yarn install $YARN_OPTS
+    popd > /dev/null
+done

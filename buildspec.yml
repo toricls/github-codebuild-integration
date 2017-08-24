@@ -1,0 +1,38 @@
+version: 0.1
+
+# This buildspec.yml requires a AWS CodeBuild project as follows:
+# - Environment:
+#   - Operating system: Ubuntu
+#   - Runtime: Node.js
+#   - Version: aws/codebuild/nodejs:6.3.1
+# - Service role:
+#   - it requires 'cloudformation:ValidateTemplate' in addition to a generated role.
+#     e.g.
+#        {
+#            "Version": "2012-10-17",
+#            "Statement": [
+#                {
+#                    "Sid": "0",
+#                    "Effect": "Allow",
+#                    "Action": [
+#                        "cloudformation:ValidateTemplate"
+#                    ],
+#                    "Resource": [
+#                        "*"
+#                    ]
+#                }
+#            ]
+#        }
+#
+
+phases:
+  install:
+    commands:
+      # Node, NPM, AWS-CLI are preinstalled on this CodeBuild image.
+      - sudo apt-get update -y && sudo apt-get install -y make apt-transport-https
+      - curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+      - echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+      - sudo apt-get update -y && sudo apt-get install -y yarn
+  build:
+    commands:
+      - make test ENV_FILE_PATH=env/example.env

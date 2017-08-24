@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+
+set -e
+
+cat << EOF
+===================================================
+  scripts/validate
+===================================================
+EOF
+
+ENV_FILE_PATH=$1
+source $ENV_FILE_PATH
+
+# Validate main template
+echo "Validating AWS SAM template"
+aws cloudformation validate-template --template-body file://sam.yml --region $AWS_DEFAULT_REGION
+
+# Validate configurations in $ENV_FILE_PATH
+## GITHUB_TARGET_RESOURCE
+echo "Validating the value of target GitHub event (GITHUB_TARGET_RESOURCE)"
+matched=0
+if [ "x$GITHUB_TARGET_RESOURCE" == "xpr" ]; then
+    matched=$((matched+1))
+fi
+if [ "x$GITHUB_TARGET_RESOURCE" == "xpush" ]; then
+    matched=$((matched+1))
+fi
+if [ $matched -ne 1 ]; then
+    echo "ERROR: '$GITHUB_TARGET_RESOURCE' is not available as GITHUB_TARGET_RESOURCE value. Use one of following: push, pr" 1>&2
+    exit 1
+fi
+
+if [ "x$ENV_FILE_PATH" == "xenv/example.env" ]; then
+    echo "Skipping rest because this context may run by CI process"
+    exit 0
+fi
+
+## GITHUB_PERSONAL_ACCESS_TOKEN
+echo "Validating the value of GitHub personal access token (GITHUB_PERSONAL_ACCESS_TOKEN)"
+response=$( curl -s -I https://api.github.com/rate_limit -H "Authorization: token $GITHUB_PERSONAL_ACCESS_TOKEN" )
+expected_scopes='X-OAuth-Scopes: admin:repo_hook, repo:status'
+retrieved_scopes=$( echo "$response" | grep 'X-OAuth-Scopes: ' )
+if echo "$response" | grep -Fq "$expected_scopes"; then
+    echo "Retrieved scopes: $retrieved_scopes"
+else
+    echo "ERROR: The GitHub personal access token you provided does not meet the requirement of github-codebuild-integration" 1>&2
+    echo "ERROR: Retrieved scopes: $retrieved_scopes"
+    echo "ERROR: Expected scopes: $expected_scopes"
+    exit 2
+fi
+## CODEBUILD_PROJECT_NAME
+echo "Validating the existence of the AWS CodeBuild project (CODEBUILD_PROJECT_NAME, CODEBUILD_PROJECT_REGION)"
+fetched_project_name=$( aws codebuild batch-get-projects --names "$CODEBUILD_PROJECT_NAME" --region "$CODEBUILD_PROJECT_REGION" --query 'projects[0].name' --output text )
+if [ "x$fetched_project_name" != "x$CODEBUILD_PROJECT_NAME" ]; then
+    echo "ERROR: There is not AWS CodeBuild project which named as '$CODEBUILD_PROJECT_NAME' in the region '$CODEBUILD_PROJECT_REGION'." 1>&2
+    echo "ERROR: You should create your own AWS CodeBuild project with that name before installing github-codebuild-integration" 1>&2
+    exit 3
+fi

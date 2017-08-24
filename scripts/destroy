@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+set -e
+
+cat << EOF
+===================================================
+  scripts/destroy
+===================================================
+EOF
+
+ENV_FILE_PATH=$1
+source $ENV_FILE_PATH
+CFN_STACK_NAME="$CODEBUILD_PROJECT_NAME"
+
+# delete stack
+aws cloudformation delete-stack --stack-name "$CFN_STACK_NAME" --region "$AWS_DEFAULT_REGION"
+echo 'Waiting for stack delete to complete'
+aws cloudformation wait stack-delete-complete --stack-name "$CFN_STACK_NAME" --region "$AWS_DEFAULT_REGION"
