@@ -6,17 +6,17 @@
 [release]: https://github.com/toricls/github-codebuild-integration/releases
 [license]: https://github.com/toricls/github-codebuild-integration/blob/master/LICENSE
 
-github-codebuild-integration is a CI dispatching/status handling tool to integrate AWS CodeBuild with GitHub Push/Pull-Request events, created with love of Serverless Architecture.
+github-codebuild-integration is a CI dispatching/status handling tool to integrate AWS CodeBuild with GitHub Push/Pull-Request webhook events, created with love of Serverless Architecture.
 
 ## Overview
 
 Yay, Serverless!
 
-TODO: Put a diagram or something here.
+[![Overview](https://github.com/toricls/github-codebuild-integration/wiki/res/overview-800x463.png)](https://github.com/toricls/github-codebuild-integration/wiki/res/overview.png)
 
 ## Features
 
-- Invoking a pre-configured AWS CodeBuild project by hooking Push or Pull Reqeust events.
+- Invoking a pre-configured AWS CodeBuild project by hooking Push or Pull Reqeust webhook events.
 - Setting GitHub's CI status based on status/result of builds on AWS CodeBuild.
 
 ### AWS account / github-codebuild-integration / GitHub repository
