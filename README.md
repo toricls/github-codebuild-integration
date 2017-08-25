@@ -109,6 +109,14 @@ $ git clone https://github.com/toricls/github-codebuild-integration.git
 $ cd $(pwd)/github-codebuild-integration
 ```
 
+#### Create GitHub Personal Access Token
+
+Open [New personal access token](https://github.com/settings/tokens/new) page and create one for github-codebuild-integration's installation.
+
+Input token description like `codebuild-YOUR_REPO_NAME` and enable `admin:repo_hook` and `repo:status` as scopes, then click the `Generate token` button.
+
+Copy the personal access token value and proceed to the next section, "Configure parameters".
+
 #### Configure parameters
 
 Copy example configuration file and edit it to configure paramters for your GitHub repository.
