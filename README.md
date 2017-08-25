@@ -47,7 +47,7 @@ GitHub accepts status creation via their APIs and many third-party CI services i
 
 On the other hand, AWS CodeBuild doesn't have such a feature to save its build project status to GitHub for now. github-codebuild-integration is a missing piece of AWS CodeBuild to make things better.
 
-## Requirements & Installation
+## Requirements
 
 ### Prerequisites
 
@@ -82,7 +82,7 @@ And the listed resources below are created in the process of installation, which
 - AWS IAM
 - AWS CloudFormation
 
-### Installation
+## Installation
 
 _**NOTE: Make sure the following before proceeding.**_  
 _**- You've loaded your [AWS credentials](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html).**_  
@@ -101,8 +101,6 @@ $ aws s3api create-bucket \
 _**NOTE: If you plan installing github-codebuild-integration into multiple AWS regions, you may create an S3 bucket for each AWS region.**_
 
 ### Per-Project Resources
-
-_**NOTE: Make sure you've created your AWS CodeBuild project before proceeding to the next steps.**_
 
 #### Configure parameters
 
@@ -127,7 +125,7 @@ yes | AWS_DEFAULT_REGION | The region where you want to provision this tool via 
 yes | CODEBUILD_PROJECT_NAME | The AWS CodeBuild project name you've already configured for your GitHub repository. | your-codebuild-project-name
 yes | CODEBUILD_PROJECT_REGION | The region where you've created a CodeBuild project. You can specify a different region from the region of CloudFormation. | us-east-1
 
-#### Install
+#### Deploy
 
 Package all artifacts and deploy to your AWS account.
 
