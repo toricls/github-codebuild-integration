@@ -102,6 +102,13 @@ _**NOTE: If you plan installing github-codebuild-integration into multiple AWS r
 
 ### Per-Project Resources
 
+#### Clone this repository
+
+```
+$ git clone https://github.com/toricls/github-codebuild-integration.git
+$ cd $(pwd)/github-codebuild-integration
+```
+
 #### Configure parameters
 
 Copy example configuration file and edit it to configure paramters for your GitHub repository.
