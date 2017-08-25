@@ -84,7 +84,9 @@ And the listed resources below are created in the process of installation, which
 
 ### Installation
 
-_**NOTE: Make sure your [AWS credentials have been loaded](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html) before proceeding the following steps.**_
+_**NOTE: Make sure the following before proceeding.**_  
+_**- You've loaded your [AWS credentials](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html).**_  
+_**- You've already created one AWS CodeBuild project at least.**_
 
 ### AWS Account-wide Resource
 
