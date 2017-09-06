@@ -1,4 +1,4 @@
-# github-codebuild-integration
+# github-codebuild-integration (gci)
 
 [![GitHub release](https://img.shields.io/github/release/toricls/github-codebuild-integration.svg?style=flat-square)][release]
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)][license]
@@ -6,7 +6,7 @@
 [release]: https://github.com/toricls/github-codebuild-integration/releases
 [license]: https://github.com/toricls/github-codebuild-integration/blob/master/LICENSE
 
-github-codebuild-integration is a CI dispatching/status handling tool to integrate AWS CodeBuild with GitHub Push/Pull-Request webhook events, created with love of Serverless Architecture.
+`gci` is a CI dispatching/status handling tool to integrate AWS CodeBuild with GitHub Push/Pull-Request webhook events, created with love of Serverless Architecture.
 
 ## Overview
 
@@ -27,17 +27,17 @@ Yay, Serverless!
 - Invoking a pre-configured AWS CodeBuild project by hooking Push or Pull Reqeust webhook events.
 - Setting GitHub's CI status based on status/result of builds on AWS CodeBuild.
 
-### AWS account / github-codebuild-integration / GitHub repository
+### AWS account / gci / GitHub repository
 
-github-codebuild-integration allows you to provision multiple installations in one AWS account as follows:
+gci allows you to provision multiple installations in one AWS account as follows:
 
 Resources | Relation
 ---------- | ----------
-AWS account : github-codebuild-integration installations | 1 : n
-github-codebuild-integration installation : GitHub repository | 1 : 1
+AWS account : gci installations | 1 : n
+gci installation : GitHub repository | 1 : 1
 GitHub repository : AWS CodeBuild project | 1 : 1 (will be extended to 1 : n in the future)
 
-As mentioned above, github-codebuild-integration can be installed as many as you want to integrate with your GitHub repositories. If you want to build 3 repositories, you may provision 3 of github-codebuild-integration installation for instance.
+As mentioned above, gci can be installed as many as you want to integrate with your GitHub repositories. If you want to build 3 repositories, you may provision 3 of gci installation for instance.
 
 ## Background
 
@@ -45,17 +45,17 @@ GitHub has a feature to show each commit's status like 'success', 'failure', 'pe
 
 GitHub accepts status creation via their APIs and many third-party CI services implement functionalities to integrate with that APIs to show their job status on GitHub.
 
-On the other hand, AWS CodeBuild doesn't have such a feature to save its build project status to GitHub for now. github-codebuild-integration is a missing piece of AWS CodeBuild to make things better.
+On the other hand, AWS CodeBuild doesn't have such a feature to save its build project status to GitHub for now. gci is a missing piece of AWS CodeBuild to make things better.
 
 ## Requirements
 
 ### Prerequisites
 
-github-codebuild-integration requires the following to be installed on your AWS account.
+gci requires the following to be installed on your AWS account.
 
 ### Required Tools
 
-We provide Makefile to you to manage github-codebuild-integration's lifecycle.
+We provide Makefile to you to manage gci's lifecycle.
 
 - GNU Make (if you are using macOS, `brew install make` is handy)
 
@@ -72,7 +72,7 @@ Provided commands use the following tools:
 - `AdministratorAccess` to your AWS Account (to use AWS CloudFormation in the installation command)
 - GitHub Account
 
-And the listed resources below are created in the process of installation, which means they are required as available AWS services in a region where you want to run github-codebuild-integration.
+And the listed resources below are created in the process of installation, which means they are required as available AWS services in a region where you want to run gci.
 
 - Amazon S3
 - Amazon SNS
@@ -85,12 +85,12 @@ And the listed resources below are created in the process of installation, which
 ## Installation
 
 _**NOTE: Make sure the following before proceeding.**_  
-_**- You've loaded your [AWS credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html).**_
+_**- You've loaded your [AWS credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html).**_  
 _**- You've already created one AWS CodeBuild project at least.**_
 
 ### AWS Account-wide Resource
 
-We have to create an S3 Bucket to store github-codebuild-integration's artifacts to provision it.
+We have to create an S3 Bucket to store gci's artifacts to provision it.
 
 ```
 $ aws s3api create-bucket \
@@ -98,7 +98,7 @@ $ aws s3api create-bucket \
     --create-bucket-configuration LocationConstraint=$AWS_DEFAULT_REGION
 ```
 
-_**NOTE: If you plan installing github-codebuild-integration into multiple AWS regions, you may create an S3 bucket for each AWS region.**_
+_**NOTE: If you plan installing gci into multiple AWS regions, you may create an S3 bucket for each AWS region.**_
 
 ### Per-Project Resources
 
@@ -111,7 +111,7 @@ $ cd $(pwd)/github-codebuild-integration
 
 #### Create GitHub Personal Access Token
 
-Open [New personal access token](https://github.com/settings/tokens/new) page and create one for github-codebuild-integration's installation.
+Open [New personal access token](https://github.com/settings/tokens/new) page and create one for gci's installation.
 
 Input token description like `codebuild-YOUR_REPO_NAME` and enable `admin:repo_hook` and `repo:status` as scopes, then click the `Generate token` button.
 
@@ -127,7 +127,7 @@ $ cp env/example.env env/$YOUR_PROJECT_NAME.env
 $ editor env/$YOUR_PROJECT_NAME.env
 ```
 
-Next table describes about all available parameters of github-codebuild-integration.
+Next table describes about all available parameters of gci.
 
 Required | Parameter Name | What is this | Example
 ------------ | ------------ | ------------- | ------------- 
@@ -171,7 +171,7 @@ A. Ask your administrator and show him/her the following:
 
 [required-accounts--resources]: https://github.com/toricls/github-codebuild-integration/blob/master/README.md#required-accounts--resources
 
-Q: I want to remove all resources of github-codebuild-integration from my AWS account.
+Q: I want to remove all resources of gci from my AWS account.
 
 A: Read the [Uninstall][uninstall] section above :X
 
@@ -179,7 +179,7 @@ A: Read the [Uninstall][uninstall] section above :X
 
 ### Changing Configurations
 
-Q: I changed my repository name after github-codebuild-integration install.
+Q: I changed my repository name after gci install.
 
 A: Change the value of `GITHUB_REPOSITORY_URL` in your env file, then deploy again.
 
@@ -200,7 +200,7 @@ A: I totally agree with you! It will be supported in the future. I think the fea
 
 Q. Can you change the icon which shown at PR page's CI status?
 
-A. GitHub shows the avatar of the user who owns the personal access token you provided. You can change the icon by using something like [Machine users](https://developer.github.com/v3/guides/managing-deploy-keys/#machine-users) to create a personal access token for github-codebuild-integration.
+A. GitHub shows the avatar of the user who owns the personal access token you provided. You can change the icon by using something like [Machine users](https://developer.github.com/v3/guides/managing-deploy-keys/#machine-users) to create a personal access token for gci.
 
 ## Contribution
 
