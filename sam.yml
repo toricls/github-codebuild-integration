@@ -15,6 +15,8 @@ Parameters:
     Type: String
   CodeBuildRegion:
     Type: String
+  BuildSkippedBy:
+    Type: String
 
 Resources:
   # AWS SAM doesn't support `Transform` in nested templates, we includes all children into main template
@@ -208,6 +210,7 @@ Resources:
           GITHUB_REPOSITORY_URL: !Ref GitHubRepositoryUrl
           GITHUB_TARGET_RESOURCE: !Ref GitHubTargetResource
           GITHUB_IGNORE_BRANCH_REGEX: !Ref GitHubIgnoreBranchRegex
+          BUILD_SKIPPED_BY: !Ref BuildSkippedBy
   StatesExecutionRole:
     Type: "AWS::IAM::Role"
     Properties:

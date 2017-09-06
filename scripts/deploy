@@ -21,7 +21,8 @@ aws cloudformation deploy \
     --parameter-overrides GitHubRepositoryUrl=$GITHUB_REPOSITORY_URL \
         GitHubPersonalAccessToken=$GITHUB_PERSONAL_ACCESS_TOKEN \
         GitHubTargetResource=$GITHUB_TARGET_RESOURCE \
-        GitHubIgnoreBranchRegex=$GITHUB_IGNORE_BRANCH_REGEX \
+        GitHubIgnoreBranchRegex="$GITHUB_IGNORE_BRANCH_REGEX" \
         CodeBuildProjectName=$CODEBUILD_PROJECT_NAME \
         CodeBuildRegion=$CODEBUILD_PROJECT_REGION \
+        BuildSkippedBy="$BUILD_SKIPPED_BY" \
     --region "$AWS_DEFAULT_REGION"

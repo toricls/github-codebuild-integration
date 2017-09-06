@@ -20,8 +20,9 @@ exports.handler = (event, context, callback) => {
 
     const eventType = ghEventType(ghEvent),
         eventAction = ghEvent.action ? ghEvent.action : '',
-        branchName = ghEvent.ref ? ghEvent.ref : ghEvent.ref.replace('refs/heads','')
-    if (shouldIgnore(eventType, eventAction, branchName)) {
+        branchName = ghEvent.ref ? ghEvent.ref : ghEvent.ref.replace('refs/heads',''),
+        commitMessage = ghEvent.head_commit ? ghEvent.head_commit.message : ''
+    if (shouldIgnore(eventType, eventAction, branchName, commitMessage)) {
         callback()
     }
 
