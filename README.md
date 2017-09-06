@@ -135,10 +135,11 @@ yes | S3_SAM_ARTIFACTS_BUCKET_NAME | An S3 bucket to store AWS SAM's artifacts. 
 yes | GITHUB_REPOSITORY_URL | A repository URL you wanted build. Use https style path and make sure trailing '.git' is removed. | https://github.com/your-org/your-repo
 yes | GITHUB_PERSONAL_ACCESS_TOKEN | Used for updating GitHub PR's status and Webhook configuration. Minimum scope are `admin:repo_hook` and `repo:status`. You can create and obtain a new token via [settings page](https://github.com/settings/tokens/new). | your-github-personal-access-token
 yes | GITHUB_TARGET_RESOURCE | Choose one event to decide when your CodeBuild project runs. Available value is `pr` or `push`. | push
-optional | GITHUB_IGNORE_BRANCH_REGEX | Regex string to specify branch name to ignore commit events. This parameter will be enabled only the `GITHUB_TARGET_RESOURCE` value is set to `push`. | wip.*
+optional | GITHUB_IGNORE_BRANCH_REGEX | Regex string to specify branch name to ignore commit events. This parameter will be enabled only the `GITHUB_TARGET_RESOURCE` value is `push`. | wip.*
 yes | AWS_DEFAULT_REGION | The region where you want to provision this tool via CloudFormation. | us-east-1
 yes | CODEBUILD_PROJECT_NAME | The AWS CodeBuild project name you've already configured for your GitHub repository. | your-codebuild-project-name
 yes | CODEBUILD_PROJECT_REGION | The region where you've created a CodeBuild project. You can specify a different region from the region of CloudFormation. | us-east-1
+optional | BUILD_SKIPPED_BY | Build invocation will be skipped if the head commit message includes the value of this parameter. This parameter will be used only the GITHUB_TARGET_RESOURCE value is `push`. | "skip ci"
 
 #### Deploy
 
