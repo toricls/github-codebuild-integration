@@ -1,7 +1,7 @@
 # github-codebuild-integration
 
-[![GitHub release](http://img.shields.io/github/release/toricls/github-codebuild-integration.svg?style=flat-square)][release]
-[![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)][license]
+[![GitHub release](https://img.shields.io/github/release/toricls/github-codebuild-integration.svg?style=flat-square)][release]
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)][license]
 
 [release]: https://github.com/toricls/github-codebuild-integration/releases
 [license]: https://github.com/toricls/github-codebuild-integration/blob/master/LICENSE
@@ -85,7 +85,7 @@ And the listed resources below are created in the process of installation, which
 ## Installation
 
 _**NOTE: Make sure the following before proceeding.**_  
-_**- You've loaded your [AWS credentials](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html).**_  
+_**- You've loaded your [AWS credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html).**_
 _**- You've already created one AWS CodeBuild project at least.**_
 
 ### AWS Account-wide Resource
