@@ -118,35 +118,6 @@ Resources:
                   - "logs:CreateLogStream"
                   - "logs:PutLogEvents"
                 Resource: "arn:aws:logs:*:*:*"
-              - Effect: Allow
-                Action:
-                  - "codebuild:StartBuild"
-                  - "codebuild:BatchGetBuilds"
-                Resource: !Sub "arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${CodeBuildProjectName}"
-  BuildDispatcher:
-    Type: "AWS::Serverless::Function"
-    Properties:
-      Role: !GetAtt LambdaExecutionRole.Arn
-      Handler: index.handler
-      Runtime: nodejs6.10
-      CodeUri: ./src/functions/build-dispatcher
-      Timeout: 10
-      MemorySize: 128
-      Environment:
-        Variables:
-          CODEBUILD_PROJECT_REGION: !Ref CodeBuildRegion
-          CODEBUILD_PROJECT_NAME: !Ref CodeBuildProjectName
-          GITHUB_TOKEN: !Ref GitHubPersonalAccessToken
-          GITHUB_REPOSITORY_URL: !Ref GitHubRepositoryUrl
-  BuildResultExporter:
-    Type: "AWS::Serverless::Function"
-    Properties:
-      Role: !GetAtt LambdaExecutionRole.Arn
-      Handler: index.handler
-      Runtime: nodejs6.10
-      CodeUri: ./src/functions/build-result-exporter
-      Timeout: 10
-      MemorySize: 128
   BuildResultNotifier:
     Type: "AWS::Serverless::Function"
     Properties:
