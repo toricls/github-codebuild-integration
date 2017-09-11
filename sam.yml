@@ -162,9 +162,9 @@ Resources:
           GITHUB_TOKEN: !Ref GitHubPersonalAccessToken
           GITHUB_REPOSITORY_URL: !Ref GitHubRepositoryUrl
   ##########################
-  # StepFunctionsStack
+  # Lambda (WebhookHandler)
   ##########################
-  SFLambdaExecutionRole:
+  WebhookHandlerExecutionRole:
     Type: "AWS::IAM::Role"
     Properties:
       AssumeRolePolicyDocument:
@@ -175,7 +175,7 @@ Resources:
               Service: lambda.amazonaws.com
             Action: "sts:AssumeRole"
       Policies:
-        - PolicyName: !Sub "${CodeBuildProjectName}-sf-lambda-execution-role"
+        - PolicyName: !Sub "${CodeBuildProjectName}-webhook-handler-execution-role"
           PolicyDocument:
             Statement:
               - Effect: Allow
@@ -190,7 +190,7 @@ Resources:
   GitHubWebhookHandler:
     Type: "AWS::Serverless::Function"
     Properties:
-      Role: !GetAtt SFLambdaExecutionRole.Arn
+      Role: !GetAtt WebhookHandlerExecutionRole.Arn
       Handler: index.handler
       Runtime: nodejs6.10
       CodeUri: ./src/functions/github-webhook-handler
@@ -204,13 +204,13 @@ Resources:
       Environment:
         Variables:
           DO_NOT_RUN: false
-          STEP_FUNCTIONS_ARN: !Ref BuildStateMachine
           CODEBUILD_PROJECT_REGION: !Ref CodeBuildRegion
           GITHUB_TOKEN: !Ref GitHubPersonalAccessToken
           GITHUB_REPOSITORY_URL: !Ref GitHubRepositoryUrl
           GITHUB_TARGET_RESOURCE: !Ref GitHubTargetResource
           GITHUB_IGNORE_BRANCH_REGEX: !Ref GitHubIgnoreBranchRegex
           BUILD_SKIPPED_BY: !Ref BuildSkippedBy
+  # We don't use followings anymore but they have to be kept as a workaround for an AWS SAM's bug? that CFn reports 'Circular dependency error' while updating the stack to modify the WebhookHandler's execution role.
   StatesExecutionRole:
     Type: "AWS::IAM::Role"
     Properties:
@@ -228,7 +228,7 @@ Resources:
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
-              - Effect: Allow
+              - Effect: Deny
                 Action:
                   - "lambda:InvokeFunction"
                 Resource: "*"
@@ -238,37 +238,11 @@ Resources:
       DefinitionString: !Sub
         |-
           {
-            "StartAt": "Dispatch Build",
+            "StartAt": "Wait 10 Seconds",
             "States": {
-              "Dispatch Build": {
-                "Type": "Task",
-                "Resource": "${BuildDispatcher.Arn}",
-                "Next": "Wait 10 Seconds"
-              },
               "Wait 10 Seconds": {
                 "Type": "Wait",
                 "Seconds": 10,
-                "Next": "Export Build Result"
-              },
-              "Export Build Result": {
-                "Type": "Task",
-                "Resource": "${BuildResultExporter.Arn}",
-                "Next": "Test If Build Finished"
-              },
-              "Test If Build Finished": {
-                "Type": "Choice",
-                "Choices": [
-                  {
-                    "Variable": "$.buildComplete",
-                    "BooleanEquals": true,
-                    "Next": "Notify Build Result"
-                  }
-                ],
-                "Default": "Wait 10 Seconds"
-              },
-              "Notify Build Result": {
-                "Type": "Task",
-                "Resource": "${BuildResultNotifier.Arn}",
                 "End": true
               }
             }
