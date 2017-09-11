@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning].
 
 ## [Unreleased]
 
+## [0.2.0] - 2017-09-12
+### Added
+- #7: Supports arbitrary keywords for ignoring builds
+### Changed
+- #9: Use CloudWatch Events instead of Step Functions
+
 ## [0.1.1] - 2017-08-28
 ### Added
 - Add Changelog (This file)
@@ -20,6 +26,8 @@ and this project adheres to [Semantic Versioning].
 ## 0.1.0 - 2017-08-24
 - Initial release
 
-[Unreleased]: https://github.com/toricls/github-codebuild-integration/compare/0.1.1...HEAD
+[Unreleased]: https://github.com/toricls/github-codebuild-integration/compare/0.2.0...HEAD
+[0.2.0]:
+https://github.com/toricls/github-codebuild-integration/compare/0.1.1...0.2.0
 [0.1.1]:
 https://github.com/toricls/github-codebuild-integration/compare/0.1.0...0.1.1
