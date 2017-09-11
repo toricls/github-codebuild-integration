@@ -19,15 +19,13 @@ Parameters:
     Type: String
 
 Resources:
-  # AWS SAM doesn't support `Transform` in nested templates, we includes all children into main template
-  # see https://github.com/awslabs/serverless-application-model/issues/90
   ##########################
-  # SNSStack
+  # SNS
   ##########################
   GitHubEventSNSTopic:
     Type: "AWS::SNS::Topic"
   ##########################
-  # IAMStack
+  # IAM
   ##########################
   GitHubIAMUser:
     Type: "AWS::IAM::User"
@@ -44,7 +42,7 @@ Resources:
     Properties:
       UserName: !Ref GitHubIAMUser
   ##########################
-  # GitHubWebhookStack
+  # GitHubWebhook(CustomResource)
   ##########################
   GitHubWebhookCustomResourceRole:
     Type: "AWS::IAM::Role"
@@ -87,7 +85,7 @@ Resources:
     Type: "Custom::GitHubWebhook"
     Properties:
       ServiceToken: !GetAtt GitHubWebhookCustomResource.Arn
-      # Define all variables to re-create via `make deploy` when parameters have changed
+      # Define all variables to re-create GitHub's webhook configuration via `make deploy` when parameters have changed
       GITHUB_TOKEN: !Ref GitHubPersonalAccessToken
       GITHUB_REPOSITORY_URL: !Ref GitHubRepositoryUrl
       GITHUB_TARGET_RESOURCE: !Ref GitHubTargetResource
@@ -96,7 +94,7 @@ Resources:
       SNS_REGION: !Ref "AWS::Region"
       SNS_TOPIC: !Ref GitHubEventSNSTopic
   ##########################
-  # LambdaStack
+  # Lambda (BuildStateNotifier)
   ##########################
   LambdaExecutionRole:
     Type: "AWS::IAM::Role"
