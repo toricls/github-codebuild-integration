@@ -132,6 +132,18 @@ Resources:
           CODEBUILD_PROJECT_REGION: !Ref CodeBuildRegion
           GITHUB_TOKEN: !Ref GitHubPersonalAccessToken
           GITHUB_REPOSITORY_URL: !Ref GitHubRepositoryUrl
+      Events:
+        CodeBuildStatusChange:
+          Type: CloudWatchEvent
+          Properties:
+            Pattern:
+              source:
+                - "aws.codebuild"
+              detail-type:
+                - !Sub "CodeBuild Build State Change"
+              detail:
+                project-name:
+                  - !Ref CodeBuildProjectName
   ##########################
   # Lambda (WebhookHandler)
   ##########################
