@@ -4,8 +4,8 @@ let assert = require('assert')
 
 let codeBuildStatusToGitHubStatus = require('./codebuild-status-to-github-status').codeBuildStatusToGitHubStatus
 
-describe('should-ignore', () => {
-    describe('shouldIgnore', () => {
+describe('codebuild-status-to-github-status', () => {
+    describe('shouldReturn', () => {
         it('should return success status if CodeBuild has done without any problem', () => {
             var result = codeBuildStatusToGitHubStatus('SUCCEEDED')
             assert.equal('success', result.state)
@@ -34,7 +34,7 @@ describe('should-ignore', () => {
             var result = codeBuildStatusToGitHubStatus('UNKNOWN_VALUE')
             assert.equal('', result.state)
             assert.equal('', result.message)
-            assert.equal('Unknown CodeBuilg buildStatus: UNKNOWN_VALUE', result.errorMessage)
+            assert.equal('Unknown CodeBuild buildStatus: UNKNOWN_VALUE', result.errorMessage)
         })
     })
 })

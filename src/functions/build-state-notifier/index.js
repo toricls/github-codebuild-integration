@@ -12,9 +12,11 @@ github.authenticate({type:'oauth', token: process.env.GITHUB_TOKEN})
 exports.handler = (event, context, callback) => {
     context.callbackWaitsForEmptyEventLoop = false
     //console.log('Received event:', JSON.stringify(event, null, 2))
-    console.log(`Build status: ${event.buildStatus}, Commit hash: ${event.sourceVersion}`)
+    const sha = event.detail['additional-information']['source-version']
+    const buildId = event.detail['build-id'].split('build/')[1]
+    console.log(`Build status: ${event.detail['build-status']}, Commit hash: ${sha}`)
 
-    const status = codeBuildStatusToGitHubStatus(event.buildStatus)
+    const status = codeBuildStatusToGitHubStatus(event.detail['build-status'])
     if (status.state === '') {
         callback(status.errorMessage)
     }
@@ -22,9 +24,9 @@ exports.handler = (event, context, callback) => {
     github.repos.createStatus({
         owner: repo.owner,
         repo: repo.name,
-        sha: event.sourceVersion,
+        sha: sha,
         state: status.state,
-        target_url: `https://${region}.console.aws.amazon.com/codebuild/home?region=${region}#/builds/${event.id}/view/new`,
+        target_url: `https://${region}.console.aws.amazon.com/codebuild/home?region=${region}#/builds/${buildId}/view/new`,
         context: 'codebuild',
         description: status.msg
     }).then((data) => {

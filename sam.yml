@@ -118,13 +118,13 @@ Resources:
                   - "logs:CreateLogStream"
                   - "logs:PutLogEvents"
                 Resource: "arn:aws:logs:*:*:*"
-  BuildResultNotifier:
+  BuildStateNotifier:
     Type: "AWS::Serverless::Function"
     Properties:
       Role: !GetAtt LambdaExecutionRole.Arn
       Handler: index.handler
       Runtime: nodejs6.10
-      CodeUri: ./src/functions/build-result-notifier
+      CodeUri: ./src/functions/build-state-notifier
       Timeout: 10
       MemorySize: 128
       Environment:

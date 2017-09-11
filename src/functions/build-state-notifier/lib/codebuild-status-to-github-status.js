@@ -21,10 +21,10 @@ exports.codeBuildStatusToGitHubStatus = (codeBuildStatus) => {
     case 'STOPPED':
     case 'TIMED_OUT':
         state = 'error'
-        msg = 'Something wrong happened on AWS CodeBuild'
+        msg = `Something wrong happened on AWS CodeBuild: ${codeBuildStatus}`
         break
     default:
-        errMsg = `Unknown CodeBuilg buildStatus: ${codeBuildStatus}`
+        errMsg = `Unknown CodeBuild buildStatus: ${codeBuildStatus}`
         console.log(errMsg)
     }
     return {
