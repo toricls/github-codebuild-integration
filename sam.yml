@@ -19,15 +19,13 @@ Parameters:
     Type: String
 
 Resources:
-  # AWS SAM doesn't support `Transform` in nested templates, we includes all children into main template
-  # see https://github.com/awslabs/serverless-application-model/issues/90
   ##########################
-  # SNSStack
+  # SNS
   ##########################
   GitHubEventSNSTopic:
     Type: "AWS::SNS::Topic"
   ##########################
-  # IAMStack
+  # IAM
   ##########################
   GitHubIAMUser:
     Type: "AWS::IAM::User"
@@ -44,7 +42,7 @@ Resources:
     Properties:
       UserName: !Ref GitHubIAMUser
   ##########################
-  # GitHubWebhookStack
+  # GitHubWebhook(CustomResource)
   ##########################
   GitHubWebhookCustomResourceRole:
     Type: "AWS::IAM::Role"
@@ -87,7 +85,7 @@ Resources:
     Type: "Custom::GitHubWebhook"
     Properties:
       ServiceToken: !GetAtt GitHubWebhookCustomResource.Arn
-      # Define all variables to re-create via `make deploy` when parameters have changed
+      # Define all variables to re-create GitHub's webhook configuration via `make deploy` when parameters have changed
       GITHUB_TOKEN: !Ref GitHubPersonalAccessToken
       GITHUB_REPOSITORY_URL: !Ref GitHubRepositoryUrl
       GITHUB_TARGET_RESOURCE: !Ref GitHubTargetResource
@@ -96,7 +94,7 @@ Resources:
       SNS_REGION: !Ref "AWS::Region"
       SNS_TOPIC: !Ref GitHubEventSNSTopic
   ##########################
-  # LambdaStack
+  # Lambda (BuildStateNotifier)
   ##########################
   LambdaExecutionRole:
     Type: "AWS::IAM::Role"
@@ -118,42 +116,13 @@ Resources:
                   - "logs:CreateLogStream"
                   - "logs:PutLogEvents"
                 Resource: "arn:aws:logs:*:*:*"
-              - Effect: Allow
-                Action:
-                  - "codebuild:StartBuild"
-                  - "codebuild:BatchGetBuilds"
-                Resource: !Sub "arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${CodeBuildProjectName}"
-  BuildDispatcher:
+  BuildStateNotifier:
     Type: "AWS::Serverless::Function"
     Properties:
       Role: !GetAtt LambdaExecutionRole.Arn
       Handler: index.handler
       Runtime: nodejs6.10
-      CodeUri: ./src/functions/build-dispatcher
-      Timeout: 10
-      MemorySize: 128
-      Environment:
-        Variables:
-          CODEBUILD_PROJECT_REGION: !Ref CodeBuildRegion
-          CODEBUILD_PROJECT_NAME: !Ref CodeBuildProjectName
-          GITHUB_TOKEN: !Ref GitHubPersonalAccessToken
-          GITHUB_REPOSITORY_URL: !Ref GitHubRepositoryUrl
-  BuildResultExporter:
-    Type: "AWS::Serverless::Function"
-    Properties:
-      Role: !GetAtt LambdaExecutionRole.Arn
-      Handler: index.handler
-      Runtime: nodejs6.10
-      CodeUri: ./src/functions/build-result-exporter
-      Timeout: 10
-      MemorySize: 128
-  BuildResultNotifier:
-    Type: "AWS::Serverless::Function"
-    Properties:
-      Role: !GetAtt LambdaExecutionRole.Arn
-      Handler: index.handler
-      Runtime: nodejs6.10
-      CodeUri: ./src/functions/build-result-notifier
+      CodeUri: ./src/functions/build-state-notifier
       Timeout: 10
       MemorySize: 128
       Environment:
@@ -161,10 +130,22 @@ Resources:
           CODEBUILD_PROJECT_REGION: !Ref CodeBuildRegion
           GITHUB_TOKEN: !Ref GitHubPersonalAccessToken
           GITHUB_REPOSITORY_URL: !Ref GitHubRepositoryUrl
+      Events:
+        CodeBuildStatusChange:
+          Type: CloudWatchEvent
+          Properties:
+            Pattern:
+              source:
+                - "aws.codebuild"
+              detail-type:
+                - !Sub "CodeBuild Build State Change"
+              detail:
+                project-name:
+                  - !Ref CodeBuildProjectName
   ##########################
-  # StepFunctionsStack
+  # Lambda (WebhookHandler)
   ##########################
-  SFLambdaExecutionRole:
+  WebhookHandlerExecutionRole:
     Type: "AWS::IAM::Role"
     Properties:
       AssumeRolePolicyDocument:
@@ -175,7 +156,7 @@ Resources:
               Service: lambda.amazonaws.com
             Action: "sts:AssumeRole"
       Policies:
-        - PolicyName: !Sub "${CodeBuildProjectName}-sf-lambda-execution-role"
+        - PolicyName: !Sub "${CodeBuildProjectName}-webhook-handler-execution-role"
           PolicyDocument:
             Statement:
               - Effect: Allow
@@ -185,12 +166,13 @@ Resources:
                   - "logs:PutLogEvents"
                 Resource: "arn:aws:logs:*:*:*"
               - Effect: Allow
-                Action: "states:StartExecution"
-                Resource: !Ref BuildStateMachine
+                Action:
+                  - "codebuild:StartBuild"
+                Resource: !Sub "arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${CodeBuildProjectName}"
   GitHubWebhookHandler:
     Type: "AWS::Serverless::Function"
     Properties:
-      Role: !GetAtt SFLambdaExecutionRole.Arn
+      Role: !GetAtt WebhookHandlerExecutionRole.Arn
       Handler: index.handler
       Runtime: nodejs6.10
       CodeUri: ./src/functions/github-webhook-handler
@@ -204,13 +186,14 @@ Resources:
       Environment:
         Variables:
           DO_NOT_RUN: false
-          STEP_FUNCTIONS_ARN: !Ref BuildStateMachine
           CODEBUILD_PROJECT_REGION: !Ref CodeBuildRegion
+          CODEBUILD_PROJECT_NAME: !Ref CodeBuildProjectName
           GITHUB_TOKEN: !Ref GitHubPersonalAccessToken
           GITHUB_REPOSITORY_URL: !Ref GitHubRepositoryUrl
           GITHUB_TARGET_RESOURCE: !Ref GitHubTargetResource
           GITHUB_IGNORE_BRANCH_REGEX: !Ref GitHubIgnoreBranchRegex
           BUILD_SKIPPED_BY: !Ref BuildSkippedBy
+  # We don't use followings anymore but they have to be kept as a workaround for an AWS SAM's bug? that CFn reports 'Circular dependency error' while updating the stack to modify the WebhookHandler's execution role.
   StatesExecutionRole:
     Type: "AWS::IAM::Role"
     Properties:
@@ -228,7 +211,7 @@ Resources:
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
-              - Effect: Allow
+              - Effect: Deny
                 Action:
                   - "lambda:InvokeFunction"
                 Resource: "*"
@@ -238,37 +221,11 @@ Resources:
       DefinitionString: !Sub
         |-
           {
-            "StartAt": "Dispatch Build",
+            "StartAt": "Wait 10 Seconds",
             "States": {
-              "Dispatch Build": {
-                "Type": "Task",
-                "Resource": "${BuildDispatcher.Arn}",
-                "Next": "Wait 10 Seconds"
-              },
               "Wait 10 Seconds": {
                 "Type": "Wait",
                 "Seconds": 10,
-                "Next": "Export Build Result"
-              },
-              "Export Build Result": {
-                "Type": "Task",
-                "Resource": "${BuildResultExporter.Arn}",
-                "Next": "Test If Build Finished"
-              },
-              "Test If Build Finished": {
-                "Type": "Choice",
-                "Choices": [
-                  {
-                    "Variable": "$.buildComplete",
-                    "BooleanEquals": true,
-                    "Next": "Notify Build Result"
-                  }
-                ],
-                "Default": "Wait 10 Seconds"
-              },
-              "Notify Build Result": {
-                "Type": "Task",
-                "Resource": "${BuildResultNotifier.Arn}",
                 "End": true
               }
             }
