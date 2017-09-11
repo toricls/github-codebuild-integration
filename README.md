@@ -76,8 +76,8 @@ And the listed resources below are created in the process of installation, which
 
 - Amazon S3
 - Amazon SNS
+- Amazon CloudWatch Events
 - AWS Lambda
-- AWS Step Functions
 - AWS CodeBuild
 - AWS IAM
 - AWS CloudFormation
@@ -143,7 +143,7 @@ optional | BUILD_SKIPPED_BY | Build invocation will be skipped if the head commi
 
 #### Deploy
 
-Package all artifacts and deploy to your AWS account.
+Package all artifacts and deploy to your AWS account. You can use this command to update your existing gci installation.
 
 ```
 $ make deploy ENV_FILE=env/$YOUR_PROJECT_NAME.env
@@ -189,10 +189,6 @@ A: Open `GitHubWebhookHandler` function (the function name on the Lambda Managem
 Don't forget to back that value to `false` after your quick work.
 
 ### Feature Request
-
-Q: I want to skip CI by adding a tag like `[skip ci]` in commit messages.
-
-A: It is planned, but not now.
 
 Q: I need more than one AWS CodeBuild project for my GitHub repository.
 

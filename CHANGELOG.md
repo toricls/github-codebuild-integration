@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning].
 [Semantic Versioning]: http://semver.org/spec/v2.0.0.html
 
 ## [Unreleased]
+### Changed
+- Update README.md to describe v0.2.0 architecture
 
 ## [0.2.0] - 2017-09-12
 ### Added
