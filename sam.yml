@@ -156,8 +156,9 @@ Resources:
                   - "logs:PutLogEvents"
                 Resource: "arn:aws:logs:*:*:*"
               - Effect: Allow
-                Action: "states:StartExecution"
-                Resource: !Ref BuildStateMachine
+                Action:
+                  - "codebuild:StartBuild"
+                Resource: !Sub "arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${CodeBuildProjectName}"
   GitHubWebhookHandler:
     Type: "AWS::Serverless::Function"
     Properties:
@@ -176,6 +177,7 @@ Resources:
         Variables:
           DO_NOT_RUN: false
           CODEBUILD_PROJECT_REGION: !Ref CodeBuildRegion
+          CODEBUILD_PROJECT_NAME: !Ref CodeBuildProjectName
           GITHUB_TOKEN: !Ref GitHubPersonalAccessToken
           GITHUB_REPOSITORY_URL: !Ref GitHubRepositoryUrl
           GITHUB_TARGET_RESOURCE: !Ref GitHubTargetResource
