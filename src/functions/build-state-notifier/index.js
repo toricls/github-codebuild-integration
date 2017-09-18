@@ -28,7 +28,7 @@ exports.handler = (event, context, callback) => {
         state: status.state,
         target_url: `https://${region}.console.aws.amazon.com/codebuild/home?region=${region}#/builds/${buildId}/view/new`,
         context: 'codebuild',
-        description: status.msg
+        description: status.message
     }).then((data) => {
         callback(null, data)
     }).catch((err) => {
