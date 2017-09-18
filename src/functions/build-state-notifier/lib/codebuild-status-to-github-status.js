@@ -15,7 +15,7 @@ exports.codeBuildStatusToGitHubStatus = (codeBuildStatus) => {
         break
     case 'IN_PROGRESS':
         state = 'pending'
-        msg = 'AWS CodeBuild is running your tests...'
+        msg = 'AWS CodeBuild is running your tests'
         break
     case 'FAULT':
     case 'STOPPED':

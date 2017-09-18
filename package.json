@@ -3,7 +3,7 @@
   "version": "0.2.0",
   "description": "",
   "scripts": {
-    "test": "mocha $(find src -name '*.test.js')",
+    "test": "mocha $(find src -name '*.test.js' ! -path '*node_modules*')",
     "lint": "eslint --ext .js src test"
   },
   "engines": {
