@@ -58,7 +58,7 @@ exports.handler = (event, context, callback) => {
                 state: 'pending',
                 target_url: `https://${region}.console.aws.amazon.com/codebuild/home?region=${region}#/builds/${data.build.id}/view/new`,
                 context: 'codebuild',
-                description: 'AWS CodeBuild is running your tests'
+                description: 'AWS CodeBuild is starting your tests'
             }).then((data) => {
                 callback(null, data)
             }).catch((err) => {
