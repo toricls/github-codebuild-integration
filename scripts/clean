@@ -14,6 +14,6 @@ rm -f ./.sam/*.yml
 for dir in ./src/functions/*; do
     echo "Cleaning dependencies for $dir"
     pushd $dir > /dev/null
-    yarn clean
+    rm -rf ./node_modules
     popd > /dev/null
 done
