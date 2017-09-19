@@ -140,10 +140,15 @@ yes | AWS_DEFAULT_REGION | The region where you want to provision this tool via 
 yes | CODEBUILD_PROJECT_NAME | The AWS CodeBuild project name you've already configured for your GitHub repository. | your-codebuild-project-name
 yes | CODEBUILD_PROJECT_REGION | The region where you've created a CodeBuild project. You can specify a different region from the region of CloudFormation. | us-east-1
 optional | BUILD_SKIPPED_BY | Build invocation will be skipped if the head commit message includes the value of this parameter. This parameter will be used only the GITHUB_TARGET_RESOURCE value is `push`. | "skip ci"
+optional | SLACK_INCOMING_WEBHOOK_URL | A [Slack incoming webhook](https://my.slack.com/apps/A0F7XDUAZ) url. You can get notified via Slack about your AWS CodeBuild project's status by configuring this parameter. | https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
+optional | SLACK_BOT_USERNAME | The bot username to show on Slack message. The default value is `gci ($CODEBUILD_PROJECT_NAME)`. | gci (your-project-name)
+optional | SLACK_BOT_ICON_EMOJI | The default value is `:robot_face:` | `:robot_face:`
 
 #### Deploy
 
 Package all artifacts and deploy to your AWS account. You can use this command to update your existing gci installation.
+
+_If you update your gci installation to the latest version, please see the difference between your configuration file and `env/example.env` file to use new configurations._
 
 ```
 $ make deploy ENV_FILE=env/$YOUR_PROJECT_NAME.env
