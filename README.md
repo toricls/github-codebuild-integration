@@ -146,7 +146,7 @@ optional | BUILD_SKIPPED_BY | Build invocation will be skipped if the head commi
 Package all artifacts and deploy to your AWS account. You can use this command to update your existing gci installation.
 
 ```
-$ make deploy ENV_FILE=env/$YOUR_PROJECT_NAME.env
+$ make deploy ENV_FILE_PATH=env/$YOUR_PROJECT_NAME.env
 ```
 
 ## Uninstall
@@ -154,7 +154,7 @@ $ make deploy ENV_FILE=env/$YOUR_PROJECT_NAME.env
 You can delete most of generated resources by executing:
 
 ```
-$ make destroy ENV_FILE=env/YOUR-PROJECT-NAME.env
+$ make destroy ENV_FILE_PATH=env/YOUR-PROJECT-NAME.env
 ```
 
 _**NOTE: CloudFormation doesn't delete CloudWatch's Log Groups. You may want to remove it manually on the AWS Management Console or via the AWS CLI. Also you may want to remove the S3 Bucket(s) you created.**_
