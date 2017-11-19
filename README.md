@@ -45,7 +45,7 @@ GitHub has a feature to show each commit's status like 'success', 'failure', 'pe
 
 GitHub accepts status creation via their APIs and many third-party CI services implement functionalities to integrate with that APIs to show their job status on GitHub.
 
-On the other hand, AWS CodeBuild doesn't have such a feature to save its build project status to GitHub for now. gci is a missing piece of AWS CodeBuild to make things better.
+~~On the other hand, AWS CodeBuild doesn't have such a feature to save its build project status to GitHub for now. gci is a missing piece of AWS CodeBuild to make things better.~~ I heard that AWS CodeBuild now supports for building by GitHub push/PR and for updating GitHub status natively. We'll find another motivation to keep developing gci :stuck_out_tongue:
 
 ## Requirements
 
