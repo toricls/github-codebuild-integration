@@ -55,14 +55,14 @@ gci requires the following to be installed on your AWS account.
 
 ### Required Tools
 
-We provide Makefile to you to manage gci's lifecycle.
+We use a Makefile to manage gci's lifecycle.
 
 - GNU Make (if you are using macOS, `brew install make` is handy)
 
-Provided commands use the following tools:
+The Makefile depends on the following tools:
 
-- Node.js v6.10 or later
-- Yarn v0.27.5 or later
+- Node.js v14.1.0 or later
+- Yarn 1.22.0 or later
 - AWS-CLI 1.11.132 or later
 - curl
 
@@ -79,18 +79,18 @@ And the listed resources below are created in the process of installation, which
 - Amazon CloudWatch Events
 - AWS Lambda
 - AWS CodeBuild
-- AWS IAM
+- AWS IAMv
 - AWS CloudFormation
 
 ## Installation
 
-_**NOTE: Make sure the following before proceeding.**_  
-_**- You've loaded your [AWS credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html).**_  
-_**- You've already created one AWS CodeBuild project at least.**_
+_**NOTE: Make sure you already have:**_  
+_**- [AWS credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html) for AWS CLI access.**_  
+_**- at least one AWS CodeBuild project created.**_
 
 ### AWS Account-wide Resource
 
-We have to create an S3 Bucket to store gci's artifacts to provision it.
+Create an S3 Bucket to store gci's artifacts to proceed.
 
 ```
 $ aws s3api create-bucket \
@@ -98,7 +98,7 @@ $ aws s3api create-bucket \
     --create-bucket-configuration LocationConstraint=$AWS_DEFAULT_REGION
 ```
 
-_**NOTE: If you plan installing gci into multiple AWS regions, you may create an S3 bucket for each AWS region.**_
+_**NOTE: Create an S3 bucket for each AWS region if you use gci in multiple AWS regions.**_
 
 ### Per-Project Resources
 
@@ -111,7 +111,7 @@ $ cd $(pwd)/github-codebuild-integration
 
 #### Create GitHub Personal Access Token
 
-Open [New personal access token](https://github.com/settings/tokens/new) page and create one for gci's installation.
+Open [New personal access token](https://github.com/settings/tokens/new) page and create one for a gci's installation.
 
 Input token description like `codebuild-YOUR_REPO_NAME` and enable `admin:repo_hook` and `repo:status` as scopes, then click the `Generate token` button.
 

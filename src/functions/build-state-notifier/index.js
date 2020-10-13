@@ -1,6 +1,6 @@
 'use strict'
 
-const GitHubApi = require('github'),
+const GitHubApi = require('@octokit/rest'),
     github = new GitHubApi({version: '3.0.0'})
 const ghUrl = require('parse-github-url'),
     repo = ghUrl(process.env.GITHUB_REPOSITORY_URL)
