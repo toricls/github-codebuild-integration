@@ -1,6 +1,6 @@
 'use strict'
 
-const GitHubApi = require('github'),
+const GitHubApi = require('@octokit/rest'),
     github = new GitHubApi({version: '3.0.0'})
 const response = require('cfn-response')
 const ghUrl = require('parse-github-url'),

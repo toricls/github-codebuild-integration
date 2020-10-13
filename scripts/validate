@@ -13,7 +13,7 @@ source $ENV_FILE_PATH
 
 # Validate main template
 echo "Validating AWS SAM template"
-aws cloudformation validate-template --template-body file://sam.yml --region $AWS_DEFAULT_REGION
+aws cloudformation validate-template --template-body file://sam.yml --region $AWS_DEFAULT_REGION > /dev/null
 
 # Validate configurations in $ENV_FILE_PATH
 ## GITHUB_TARGET_RESOURCE
